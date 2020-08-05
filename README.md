@@ -1,1 +1,1 @@
-# Reverse_Cuthill_McKee_C_-_parallel
+# Reverse_Cuthill_McKee_C_parallel
