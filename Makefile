@@ -6,7 +6,7 @@
 
 SHELL := /bin/bash
 CC = gcc
-CFLAGS = -Wall -O3
+#zCFLAGS = -Wall -O3
 INCLUDES = -I ./inc
 
 clean:
@@ -14,15 +14,15 @@ clean:
 	rm tester/*.h
 
 
-lib: rcm_sequential_a.o  rcm_sequential_b.o
-	ar rcs lib/rcm_sequential_a.a lib/rcm_sequential_a.o
-	ar rcs lib/rcm_sequential_b.a lib/rcm_sequential_b.o
+lib: rcm_sequential.o queue.o
+	ar rcs lib/rcm_sequential.a lib/rcm_sequential.o lib/queue.o
+
 
 	rm lib/*.o
 
 
-rcm_sequential_a.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/rcm_sequential_a.c -o lib/rcm_sequential_a.o -pg
+rcm_sequential.o:
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/rcm_sequential.c -o lib/rcm_sequential.o
 
-rcm_sequential_b.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/rcm_sequential_b.c -o lib/rcm_sequential_b.o -pg
+queue.o:
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/queue.c -o lib/queue.o

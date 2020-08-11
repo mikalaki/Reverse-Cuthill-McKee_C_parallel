@@ -1,34 +1,32 @@
 
 #ifndef RCM_H
 #define RCM_H
+/*
+*       Parallels and Distributed Systems Exercise 4
+*       RCM Functions' Declaration.
+*       Author:Michael Karatzas
+*       AEM:9137
+*/
 
+//Struct for queue implementation
 #include <stdbool.h>
 
-typedef struct  {
-  int * data;
-  int size,capacity,front,rear;
-} queue;
-
-//! Reverse Cuthill Mckee algorithm
+//! Reverse Cuthill Mckee algorithm, returns the permutation order array, in respect to the algorithm.
 /*!
  \param matrix      The initial symmetric sparse matrix     [n-by-n]
- \param n           Τhe dimension of the matrix             [scalar]
- NOTE: Both matrices G and w are stored in row-major format.
+ \param n           Τhe 1-dimension of the matrix             [scalar]
 */
 int * rcm(int ** matrix,int n);
 
-//Function for calculating the degree of each row.
-void findDegrees(int * degrees,int ** arr, int n );
+//Method for calculating the degree of each node.
+void calculateDegrees(int * degrees,int ** arr, int n );
 
+//Methods for Sorting the neighbours' degrees of a node and their indexes with the same order.
 void merge(int * arr,int * idx, int l, int m, int r);
 void mergeSort_degrees_indexes(int * arr,int * idx, int l, int r);
 
-queue * queueInit(int size);
-void queueAdd( queue * q, int element);
-int queuePoP( queue * q);
-bool isEmptyQueue(queue *q);
 
-
+//Method for reversing the R vector.
 void reverseArray(int * arr, int start, int end) ;
 
 #endif

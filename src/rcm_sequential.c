@@ -7,71 +7,110 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "rcm.h"
+#include "queue.h"
 
-#define DEBUG 1
+//define if the code running in debug status.
+#define DEBUG 0
 
-//The function that returns the permutation order array, in respect to the
-//reverse Cuthill Mckee algorithm
 int * rcm(int ** matrix, int n ){
 
+  //Array when the degrees of each node will be stored.
   int * degrees= (int *) malloc(sizeof(int) * n);
-  //in this variable, we will get the order of elements by asceding degree.
-  int * AscendingDegrIndexes= (int *) malloc(sizeof(int) * n);
+
+  //number of unvisited nodes.
+  int nOfUnvisitedNodes=n;
+
+  //Array for indication of not visited nodes, if notVisitedNodes[i]= -1 , node is visited.
+  int * notVisitedNodes= (int *) malloc(sizeof(int) * n);
 
   //creating the Q queue
-  queue *  Q = queueInit(n);
+  queue * Q = queueInit(n);
+
+  //queue for sort a node elements
+  queue * nodeNeighbours = queueInit(n);
+
+
+  int * degreesToShort=(int *)malloc(sizeof(int));
+
+  //R is the permutation order matrix.
   int * R=(int *) malloc(sizeof(int)*n);
   int Rcounter=0;
+  int minDegreeElement=0;
 
   //1. Find the degree of each element.
-  findDegrees(degrees,matrix,n);
+  calculateDegrees(degrees,matrix,n);
   if(DEBUG)for (size_t i = 0; i < n; i++) {
       printf("\n for line with index=%ld, the degree is %d", i , degrees[i]);
 
   }
 
-  //2. Sort asceding the degrees and get their indexes.
-  //initialize indexes
-  for (size_t i = 0; i < n; i++) {
-      AscendingDegrIndexes[i]= i;
+
+  //initialize indexes of nodes
+  for (int i = 0; i < n; i++) {
+      notVisitedNodes[i]= i;
   }
 
-  //Sorting the degrees and indeces
-  mergeSort_degrees_indexes(degrees,AscendingDegrIndexes, 0, n-1);
-  if(DEBUG)for (size_t i = 0; i < n; i++) {
-      printf("\n  After SORT: for line with index=%ld, the degree is %d", i , degrees[i]);
-      printf("\n  After SORT: asx index=%ld,  is %d", i , AscendingDegrIndexes[i]);
-  }
-  free(degrees);
 
-  for(int i=0 ; i<n ; i++){                                                     //N
-    if(AscendingDegrIndexes[i] != -1 ){
-      if(DEBUG) printf("\n \n \n ALLL GOOD HERE 1 ");
-      queueAdd(Q,AscendingDegrIndexes[i]);
-      AscendingDegrIndexes[i]= -1;
-      if(DEBUG) printf("\n \n \n ALLL GOOD HERE 2 ");
+  //running a loop for accessing also the elements of disjoint graphs.
+  while(nOfUnvisitedNodes > 0){                              //N
+    // if(notVisitedNodes[nodeIndex] ==-1) // If the if sentence is true then node with index: nodeIndex is visited.
+    //   continue;
+
+
+    minDegreeElement=0;
+
+    for (int i = 0; i < n; i++)
+      if (degrees[i]< degrees[minDegreeElement] && notVisitedNodes[i] !=-1 || notVisitedNodes[minDegreeElement]==-1 )  //// βρίσκουμε ελαχιστου degree σημειο στο notVisited
+        minDegreeElement = i;
+
+    if(notVisitedNodes[minDegreeElement]!=-1){
+      queueAdd(Q,minDegreeElement);
+      notVisitedNodes[minDegreeElement]=-1;
+      nOfUnvisitedNodes--;
     }
-    if(DEBUG) printf("\n \n \n Q->data[Q->front]= %d", Q->data[Q->front]);
 
-    while (!isEmptyQueue(Q)) { 																							    //Ν
+      while (!isEmptyQueue(Q)) {
 
-      for (int j = i; j <n; j++) { /// διανύω τον πίνακα , 													Ν
-        if ( j != (Q->data[Q->front]) && (matrix[Q->data[Q->front]][AscendingDegrIndexes[j]] != 0) ) {
-          queueAdd(Q,AscendingDegrIndexes[j]);
-          AscendingDegrIndexes[j]=-1;
+        nodeNeighbours->front=-1;
+        nodeNeighbours->rear=-1;
+        nodeNeighbours->size=0;
+
+        for (int j = 0; j <n; j++) { /// βρισκω γειτονες
+          if ( j != (Q->data[Q->front]) && notVisitedNodes[j] !=-1  && (matrix[Q->data[Q->front]][notVisitedNodes[j]] != 0) ) {
+            queueAdd(nodeNeighbours,notVisitedNodes[j]);
+            if(DEBUG)printf("\n \n I AM HERE!!\n");
+          }
         }
+
+        if(nodeNeighbours->size != 0){
+          //reallocating the degrees for sortin array.
+          int * p =(int *)realloc(degreesToShort,(size_t)sizeof(int)*(nodeNeighbours->size) );
+          if (!p) {
+            printf("Couldn't Reallocate Memory!\n" );
+            exit(1);
+          } else {
+              degreesToShort = p;
+          }
+
+          for (int k = 0; k < nodeNeighbours->size; k++) {
+            degreesToShort[k]= degrees[nodeNeighbours->data[k]];
+          }
+
+          mergeSort_degrees_indexes(degreesToShort,nodeNeighbours->data, 0, nodeNeighbours->size -1 );
+
+          for (int k = 0; k < nodeNeighbours->size; k++) {
+            queueAdd(Q,nodeNeighbours->data[k]);
+            notVisitedNodes[nodeNeighbours->data[k]]=-1;
+            nOfUnvisitedNodes--;
+          }
+        }
+
+        R[Rcounter]= queuePoP(Q);
+        Rcounter++;
+
       }
-
-
-      R[Rcounter]= queuePoP(Q);
-      Rcounter++;
-
-    }
-
   }
-
 
   //reverse the R vactor
   reverseArray(R,0,n-1);
@@ -80,7 +119,7 @@ int * rcm(int ** matrix, int n ){
 
 }
 
-void findDegrees(int * degrees,int ** arr, int n ){ // problhma eiani oti den pernaei o 2d pinakas
+void calculateDegrees(int * degrees,int ** arr, int n ){ // problhma eiani oti den pernaei o 2d pinakas
 
   for (int i = 0; i < n; i++) {
     int count = 0;
@@ -173,56 +212,6 @@ void mergeSort_degrees_indexes(int * arr,int * idx, int l, int r)
     }
 }
 
-
-// Queue methods
-queue * queueInit(int size){
-  queue * Q = (queue *)malloc(sizeof(queue));
-  Q->data=(int *)malloc(sizeof(int)*size);
-  Q->capacity=size;
-  Q->rear=-1;
-  Q->front=-1;
-  Q->size=0;
-  return Q;
-}
-
-void queueAdd( queue * q, int element){
-  if(  q->rear== (q->capacity-1) ){
-    printf("\n Queue is full, no elements can be added.");
-  }
-  else{
-    if(q->front == -1){
-      q->front=0;
-    }
-    q->rear++;
-    q->size++;
-    q->data[q->rear]=element;
-
-  }
-}
-
-int queuePoP( queue * q){
-  if(   (q-> front)>(q->rear)   ||  ( q->front) == -1 ){
-    printf("\n Queue is empty, no elements can be retrieved from the queue. Qfront = ",(q-> front) );
-  }
-  else{
-    int element;
-    element = q->data[q->front];
-    q->front++;
-    q->size--;
-    return element;
-  }
-}
-
-
-bool isEmptyQueue(queue *q){
-  if(   (q-> front)>(q->rear)   ||  ( q->front) == -1 ){
-    printf("\n Queue is empty, no elements can be retrieved from the queue Qfront = %d",(q-> front) );
-    return true;
-  }
-  else{
-    return false;
-  }
-}
 
 
 void reverseArray(int * arr, int start, int end)

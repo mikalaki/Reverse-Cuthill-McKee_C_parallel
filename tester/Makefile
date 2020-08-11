@@ -9,16 +9,10 @@ CC = gcc
 
 
 
-test_sequential_a:
-	cd ../; make clean; make lib;
-	cp ../lib/*.a ../inc/rcm.h ./;
-	$(CC) test.c rcm_sequential_a.a -o $@
-	./test_sequential_a
-	rm test_sequential_a
 
-test_sequential_b:
+test_sequential:
 	cd ../; make clean; make lib;
-	cp ../lib/*.a ../inc/rcm.h ./;
-	$(CC) test.c rcm_sequential_b.a -o $@
-	./test_sequential_b
-	rm test_sequential_b
+	cp ../lib/*.a ../inc/rcm.h  ./;
+	$(CC) test.c rcm_sequential.a -o $@
+	./test_sequential
+	rm test_sequential
