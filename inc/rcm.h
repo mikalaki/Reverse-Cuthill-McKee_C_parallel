@@ -7,8 +7,6 @@
 *       Author:Michael Karatzas
 *       AEM:9137
 */
-
-//Struct for queue implementation
 #include <stdbool.h>
 
 //! Reverse Cuthill Mckee algorithm, returns the permutation order array, in respect to the algorithm.
@@ -16,10 +14,10 @@
  \param matrix      The initial symmetric sparse matrix     [n-by-n]
  \param n           Τhe 1-dimension of the matrix             [scalar]
 */
-int * rcm(int ** matrix,int n);
+int * rcm(int * matrix,int n);
 
 //Method for calculating the degree of each node.
-void calculateDegrees(int * degrees,int ** arr, int n );
+void calculateDegrees(int * degrees,int * arr, int n );
 
 //Methods for Sorting the neighbours' degrees of a node and their indexes with the same order.
 void merge(int * arr,int * idx, int l, int m, int r);
