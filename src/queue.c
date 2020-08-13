@@ -10,12 +10,16 @@
 #include <stdlib.h>
 #include "queue.h"
 
-#define DEBUG 0
+
 
 /////////QUEUE'S METHODS////////
 queue * queueInit(int capacity){
   queue * Q = (queue *)malloc(sizeof(queue));
   Q->data=(int *)malloc(sizeof(int)*capacity);
+  if( !Q || !(Q->data)  ){
+    printf("Problem Allocating Memory!\n" );
+    exit(1);
+  }
   Q->capacity=capacity;
   Q->rear=-1;
   Q->front=-1;
@@ -25,7 +29,7 @@ queue * queueInit(int capacity){
 
 void queueAdd( queue * q, int element){
   if(  q->rear== (q->capacity-1) ){
-    if(DEBUG)printf("\n Queue is full, no elements can be added.");
+    //printf("\n Queue is full, no elements can be added.");
   }
   else{
     if(q->front == -1){
@@ -40,7 +44,7 @@ void queueAdd( queue * q, int element){
 
 int queuePoP( queue * q){
   if(   (q-> front)>(q->rear)   ||  ( q->front) == -1 ){
-    if(DEBUG)printf("\n Queue is empty, no elements can be retrieved from the queue.");
+    //printf("\n Queue is empty, no elements can be retrieved from the queue.");
   }
   else{
     int element;
@@ -54,7 +58,7 @@ int queuePoP( queue * q){
 
 bool isEmptyQueue(queue *q){
   if(   (q-> front)>(q->rear)   ||  ( q->front) == -1 ){
-    if(DEBUG)printf("\n Queue is empty, no elements can be retrieved from the queue Q.");
+    //printf("\n Queue is empty, no elements can be retrieved from the queue Q.");
     return true;
   }
   else{

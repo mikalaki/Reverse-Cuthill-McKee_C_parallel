@@ -10,81 +10,98 @@
 #include "rcm.h"
 #include "queue.h"
 
-//define if the code running in debug status.
-#define DEBUG 0
 
-int * rcm(int ** matrix, int n ){
+//Reverse Cuthill Mckee algorithm function definition.
+int * rcm(int * matrix, int n ){
 
-  //Array when the degrees of each node will be stored.
+  //Array where the degrees of all nodes will be stored, degress[i], is the degree of i-st node.
   int * degrees= (int *) malloc(sizeof(int) * n);
-
-  //number of unvisited nodes.
-  int nOfUnvisitedNodes=n;
-
-  //Array for indication of not visited nodes, if notVisitedNodes[i]= -1 , node is visited.
-  int * notVisitedNodes= (int *) malloc(sizeof(int) * n);
-
-  //creating the Q queue
-  queue * Q = queueInit(n);
-
-  //queue for sort a node elements
-  queue * nodeNeighbours = queueInit(n);
-
-
-  int * degreesToShort=(int *)malloc(sizeof(int));
-
-  //R is the permutation order matrix.
-  int * R=(int *) malloc(sizeof(int)*n);
-  int Rcounter=0;
-  int minDegreeElement=0;
-
-  //1. Find the degree of each element.
-  calculateDegrees(degrees,matrix,n);
-  if(DEBUG)for (size_t i = 0; i < n; i++) {
-      printf("\n for line with index=%ld, the degree is %d", i , degrees[i]);
-
+  if( !degrees ){
+    printf("Problem Allocating Memory!\n" );
+    exit(1);
   }
 
+  //Number of unvisited nodes, initialize it to n.
+  int nOfUnvisitedNodes=n;
 
-  //initialize indexes of nodes
+  //Array for indication of not visited nodes, if notVisitedNodes[i]= -1 , node is visited, else notVisitedNodes[i]= i;
+  int * notVisitedNodes= (int *) malloc(sizeof(int) * n);
+  if( !notVisitedNodes ){
+    printf("Problem Allocating Memory!\n" );
+    exit(1);
+  }
+
+  //Initializing the Q queue
+  queue * Q = queueInit(n);
+
+  //Initializing queue for sort a node's neighbours
+  queue * nodeNeighbours = queueInit(n);
+
+  //Array to store the degrees of the node's neighbours ,for each node,passed to empty Q , it is reallocated.
+  int * degreesToShort=(int *)malloc(sizeof(int));
+  if( !degreesToShort ){
+    printf("Problem Allocating Memory!\n" );
+    exit(1);
+  }
+
+  //R is the permutation order array.
+  int * R=(int *) malloc(sizeof(int)*n);
+  if( !R ){
+    printf("Problem Allocating Memory!\n" );
+    exit(1);
+  }
+
+  //The number of elements that have inserted into R array.
+  int Rcounter=0;
+
+  int minDegreeElement=0;
+
+  //Find the degree of each element.
+  calculateDegrees(degrees,matrix,n);
+
+
+
+  //initialize notVisitedNodes array.
   for (int i = 0; i < n; i++) {
       notVisitedNodes[i]= i;
   }
 
 
   //running a loop for accessing also the elements of disjoint graphs.
-  while(nOfUnvisitedNodes > 0){                              //N
-    // if(notVisitedNodes[nodeIndex] ==-1) // If the if sentence is true then node with index: nodeIndex is visited.
-    //   continue;
+  while(nOfUnvisitedNodes > 0){ // This loop is usefull only when there are unvisited (disjoint) nodes left.
 
 
     minDegreeElement=0;
 
+    //Finding the minimun degree unvisited node.
     for (int i = 0; i < n; i++)
-      if (degrees[i]< degrees[minDegreeElement] && notVisitedNodes[i] !=-1 || notVisitedNodes[minDegreeElement]==-1 )  //// βρίσκουμε ελαχιστου degree σημειο στο notVisited
+      if (degrees[i]< degrees[minDegreeElement] && notVisitedNodes[i] !=-1 || notVisitedNodes[minDegreeElement]==-1 )
         minDegreeElement = i;
 
+    //If there are not vissited elements left , we add the one with minimun degree in Q queue.
     if(notVisitedNodes[minDegreeElement]!=-1){
       queueAdd(Q,minDegreeElement);
       notVisitedNodes[minDegreeElement]=-1;
       nOfUnvisitedNodes--;
     }
 
-      while (!isEmptyQueue(Q)) {
+    //While Q queue is not empty we sort its element by increasing order of degree and add them to R.
+    while (!isEmptyQueue(Q)) {
 
+        //By these way we empty the node's neighbours queue
         nodeNeighbours->front=-1;
         nodeNeighbours->rear=-1;
         nodeNeighbours->size=0;
 
-        for (int j = 0; j <n; j++) { /// βρισκω γειτονες
-          if ( j != (Q->data[Q->front]) && notVisitedNodes[j] !=-1  && (matrix[Q->data[Q->front]][notVisitedNodes[j]] != 0) ) {
+        //Finding the neighbours of the node that is going to be add next in the R array.
+        for (int j = 0; j <n; j++) {
+          if ( j != (Q->data[Q->front]) && notVisitedNodes[j] !=-1  && (matrix[Q->data[Q->front]*n+notVisitedNodes[j]] != 0) ) {
             queueAdd(nodeNeighbours,notVisitedNodes[j]);
-            if(DEBUG)printf("\n \n I AM HERE!!\n");
           }
         }
 
         if(nodeNeighbours->size != 0){
-          //reallocating the degrees for sortin array.
+          //reallocating neighbours'degrees array.
           int * p =(int *)realloc(degreesToShort,(size_t)sizeof(int)*(nodeNeighbours->size) );
           if (!p) {
             printf("Couldn't Reallocate Memory!\n" );
@@ -93,38 +110,49 @@ int * rcm(int ** matrix, int n ){
               degreesToShort = p;
           }
 
+          //getting the degrees of the node's neighbours
           for (int k = 0; k < nodeNeighbours->size; k++) {
             degreesToShort[k]= degrees[nodeNeighbours->data[k]];
           }
 
+          //Sorting the degrees of the nodes and their indexes with the same order.
           mergeSort_degrees_indexes(degreesToShort,nodeNeighbours->data, 0, nodeNeighbours->size -1 );
 
+          //Adding the neighbours of the "next in R" node in the Q queue .
           for (int k = 0; k < nodeNeighbours->size; k++) {
             queueAdd(Q,nodeNeighbours->data[k]);
             notVisitedNodes[nodeNeighbours->data[k]]=-1;
             nOfUnvisitedNodes--;
           }
         }
-
+        //Adding the current front element of Q queue in R array
         R[Rcounter]= queuePoP(Q);
         Rcounter++;
 
-      }
+    }
   }
 
-  //reverse the R vactor
+  //Freeing memory from the heap
+  free(degrees);
+  free(notVisitedNodes);
+  free(Q);
+  free(nodeNeighbours);
+  free(degreesToShort);
+
+  //reverse the R vector
   reverseArray(R,0,n-1);
   return R;
 
 
 }
 
-void calculateDegrees(int * degrees,int ** arr, int n ){ // problhma eiani oti den pernaei o 2d pinakas
+//Definition of method for calculating degrees of nodes
+void calculateDegrees(int * degrees,int * arr, int n ){ // problhma eiani oti den pernaei o 2d pinakas
 
   for (int i = 0; i < n; i++) {
     int count = 0;
     for (int j = 0; j < n; j++) {
-      count += arr[i][j];
+      count += arr[i*n+j];
     }
 
     degrees[i]=count;
@@ -133,7 +161,8 @@ void calculateDegrees(int * degrees,int ** arr, int n ){ // problhma eiani oti d
 
 
 
-//// Merge sort
+//// Merge sort , the bellow code is get from https://www.geeksforgeeks.org/, and
+//// modified for the needs of our project.
 
 // Merges two subarrays of arr[].
 // First subarray is arr[l..m]
