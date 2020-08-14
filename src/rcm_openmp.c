@@ -1,6 +1,6 @@
 /*
 *       Parallels and Distributed Systems Exercise 4
-*       (Sequential) implementation of Reverse Cuthill Mckee algorithm for sparse matriices in C.
+*       Parallel implementation of Reverse Cuthill Mckee algorithm for sparse matrices in C with openMP.
 *       Author:Michael Karatzas
 *       AEM:9137
 *       September 2020
@@ -27,16 +27,17 @@ int * rcm(int * matrix, int n ){
   int nOfUnvisitedNodes=n;
 
   //Array for indication of not visited nodes, if notVisitedNodes[i]= -1 , node is visited, else notVisitedNodes[i]= i;
+  //initialization happens later.
   int * notVisitedNodes= (int *) malloc(sizeof(int) * n);
   if( !notVisitedNodes ){
     printf("Problem Allocating Memory!\n" );
     exit(1);
   }
 
-  //Initializing the Q queue
+  //Initializing the Q queue.
   queue * Q = queueInit(n);
 
-  //Initializing queue for sort a node's neighbours
+  //Initializing queue that stores a node's neighbours,with capacity equals to n.
   queue * nodeNeighbours = queueInit(n);
 
   //Array to store the degrees of the node's neighbours ,for each node,passed to empty Q , it is reallocated.
@@ -46,14 +47,14 @@ int * rcm(int * matrix, int n ){
     exit(1);
   }
 
-  //R is the permutation order array.
+  //memory allocation for  permutation order array R.
   int * R=(int *) malloc(sizeof(int)*n);
   if( !R ){
     printf("Problem Allocating Memory!\n" );
     exit(1);
   }
 
-  //The number of elements that have inserted into R array.
+  //Counter of number of elements that have inserted into R array, initialized to zero.
   int Rcounter=0;
 
   int minDegreeElement=0;
@@ -97,23 +98,24 @@ int * rcm(int * matrix, int n ){
     //While Q queue is not empty we sort its element by increasing order of degree and add them to R.
     while (!isEmptyQueue(Q)) {
 
-        //By these way we empty the node's neighbours queue
+        //By these way we "make empty" the node's neighbours queue
         nodeNeighbours->front=-1;
         nodeNeighbours->rear=-1;
         nodeNeighbours->size=0;
 
 
 
-        //Finding the neighbours of the node that is going to be add next in the R array.
-        //by using the ordered property race condition is avoided and correctness is quaranted.
-        //Furthermore ordered property, ensures that the nodeNeighbours queue will be filled with the same order as
-        //in sequential version of the code.
+        /*Finding the neighbours of the node that is going to be add next in the R array.
+        By parallelize the for loop, we get significant improve in time.
+        By using the ordered property race condition is avoided and correctness is quaranted.
+        Furthermore ordered property, ensures that the nodeNeighbours queue will be filled with the same order as
+        in sequential version of the code, so the R array is going to be exactly the same.*/
         #pragma omp parallel for ordered  shared(Q,matrix) private(j)
         for ( j = 0; j <n; j++) {
 
 
             if ( j != (Q->data[Q->front]) && notVisitedNodes[j] !=-1  && (matrix[Q->data[Q->front]*n+notVisitedNodes[j]] != 0) ) {
-              //critical section is accesed by openmp threads in order.
+              //critical section is accesed by one openmp thread at a time, in same order as if code executed sequentialy.
               #pragma omp ordered
               {
                 queueAdd(nodeNeighbours,notVisitedNodes[j]);
@@ -125,7 +127,7 @@ int * rcm(int * matrix, int n ){
 
 
         if(nodeNeighbours->size != 0){
-          //reallocating neighbours'degrees array.
+          //reallocating neighbours'degrees array to size equal to the number of node's neigbours.
           int * p =(int *)realloc(degreesToShort,(size_t)sizeof(int)*(nodeNeighbours->size) );
           if (!p) {
             printf("Couldn't Reallocate Memory!\n" );
@@ -135,7 +137,7 @@ int * rcm(int * matrix, int n ){
           }
 
 
-          //getting the degrees of the node's neighbours
+          //Getting the degrees of the node's neighbours
           //We get a small time benefit by parallelizing the loop . No race-condition exists here.
           #pragma omp parallel for shared(Q,degreesToShort) private(k)
           for (k = 0; k < nodeNeighbours->size; k++) {
@@ -146,12 +148,12 @@ int * rcm(int * matrix, int n ){
           mergeSort_degrees_indexes(degreesToShort,nodeNeighbours->data, 0, nodeNeighbours->size -1 );
 
           //Adding the neighbours of the "next in R" node in the Q queue .
+          //We get a small time benefit by parallelizing the loop .
           //by using the ordered property race condition is avoided and correctness is quaranted.
-
           #pragma omp parallel for ordered shared(Q,degreesToShort) private(k)
           for ( k = 0; k < nodeNeighbours->size; k++) {
             notVisitedNodes[nodeNeighbours->data[k]]=-1;
-            //critical section is accesed by openmp threads in order.
+            //critical section is accesed by one openmp thread at a time, in same order as if code executed sequentialy.
             #pragma omp ordered
             {
               queueAdd(Q,nodeNeighbours->data[k]);
@@ -164,6 +166,7 @@ int * rcm(int * matrix, int n ){
         }
         //Adding the current front element of Q queue in R array
         R[Rcounter]= queuePoP(Q);
+        //update the value of Rcounter, as an element has just inserted in R.
         Rcounter++;
 
     }
@@ -201,14 +204,14 @@ void calculateDegrees(int * degrees,int * arr, int n ){ // problhma eiani oti de
 }
 
 
-
-//// Merge sort , the bellow code is get from https://www.geeksforgeeks.org/, and
-//// modified for the needs of our project.
+/*Merge sort, the code bellow  is get from https://www.geeksforgeeks.org/, and
+modified for the needs of our project.*/
 // In this parallel version also, Openmp directives are used to make it be executed faster.
 
 // Merges two subarrays of arr[].
 // First subarray is arr[l..m]
 // Second subarray is arr[m+1..r]
+// idx is the array of indexes of arr's elements
 void merge(int * arr,int * idx, int l, int m, int r)
 {
     int i, j, k;
@@ -219,7 +222,8 @@ void merge(int * arr,int * idx, int l, int m, int r)
     int L[n1], R[n2];
     int Lidx[n1], Ridx[n2];
 
-    /* Copy data to temp arrays L[] and R[], in parallel */
+    /* Copy data to temp arrays L[] and R[], in parallel, with sections
+    one thread copies data to L[] array and the other copies to R[] */
     #pragma omp parallel sections  shared(arr,idx)
     {
       #pragma omp section

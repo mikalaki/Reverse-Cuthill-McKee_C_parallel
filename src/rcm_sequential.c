@@ -34,7 +34,7 @@ int * rcm(int * matrix, int n ){
   //Initializing the Q queue
   queue * Q = queueInit(n);
 
-  //Initializing queue for sort a node's neighbours
+  //Initializing queue that stores a node's neighbours,with capacity equals to n.
   queue * nodeNeighbours = queueInit(n);
 
   //Array to store the degrees of the node's neighbours ,for each node,passed to empty Q , it is reallocated.
@@ -44,14 +44,14 @@ int * rcm(int * matrix, int n ){
     exit(1);
   }
 
-  //R is the permutation order array.
+  //memory allocation for  permutation order array R.
   int * R=(int *) malloc(sizeof(int)*n);
   if( !R ){
     printf("Problem Allocating Memory!\n" );
     exit(1);
   }
 
-  //The number of elements that have inserted into R array.
+  //Counter of number of elements that have inserted into R array, initialized to zero.
   int Rcounter=0;
 
   int minDegreeElement=0;
@@ -88,7 +88,7 @@ int * rcm(int * matrix, int n ){
     //While Q queue is not empty we sort its element by increasing order of degree and add them to R.
     while (!isEmptyQueue(Q)) {
 
-        //By these way we empty the node's neighbours queue
+        //By these way we "make empty" the node's neighbours queue
         nodeNeighbours->front=-1;
         nodeNeighbours->rear=-1;
         nodeNeighbours->size=0;
@@ -127,6 +127,7 @@ int * rcm(int * matrix, int n ){
         }
         //Adding the current front element of Q queue in R array
         R[Rcounter]= queuePoP(Q);
+        //update the value of Rcounter, as an element has just inserted in R.
         Rcounter++;
 
     }
@@ -161,12 +162,13 @@ void calculateDegrees(int * degrees,int * arr, int n ){ // problhma eiani oti de
 
 
 
-//// Merge sort , the bellow code is get from https://www.geeksforgeeks.org/, and
-//// modified for the needs of our project.
+/*Merge sort, the code bellow code is get from https://www.geeksforgeeks.org/, and
+modified for the needs of our project.*/
 
 // Merges two subarrays of arr[].
 // First subarray is arr[l..m]
 // Second subarray is arr[m+1..r]
+// idx is the array of indexes of arr's elements
 void merge(int * arr,int * idx, int l, int m, int r)
 {
     int i, j, k;

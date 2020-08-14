@@ -12,7 +12,7 @@
 
 
 //The initial sparse matrix dimension and sparsity
-#define MATRIX_DIM 30000
+#define MATRIX_DIM 10000
 #define SPARSITY 0.80
 
 struct timespec start, finish;
