@@ -16,3 +16,10 @@ test_sequential:
 	$(CC) test.c rcm_sequential.a -o $@
 	./test_sequential
 	rm test_sequential
+
+test_openmp:
+	cd ../; make clean; make lib;
+	cp ../lib/*.a ../inc/rcm.h  ./;
+	$(CC) test.c rcm_openmp.a -o $@ -fopenmp
+	./test_openmp
+	rm test_openmp

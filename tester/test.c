@@ -12,8 +12,8 @@
 
 
 //The initial sparse matrix dimension and sparsity
-#define MATRIX_DIM 210
-#define SPARSITY 0.79
+#define MATRIX_DIM 30000
+#define SPARSITY 0.80
 
 struct timespec start, finish;
 double elapsed;
@@ -41,16 +41,15 @@ int main(int argc, char const *argv[]) {
   //Initialize
   initSparseMatrix(mat,(double)SPARSITY ,n);
 
-  //Print the initial symmetric sparse array.
-  printf("\n [");
-  for (int i=0; i<n ; i++){
-    for (int j = 0; j < n; j++) {
-      printf(" %d ", mat[i*n+j]);
-    }
-    printf("\n  ");
-  }
-
-  printf("]");
+  // //Print the initial symmetric sparse array.
+  // printf("\n [");
+  // for (int i=0; i<n ; i++){
+  //   for (int j = 0; j < n; j++) {
+  //     printf(" %d ", mat[i*n+j]);
+  //   }
+  //   printf("\n  ");
+  // }
+  // printf("]");
 
 
 
