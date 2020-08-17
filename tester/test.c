@@ -12,11 +12,14 @@
 
 
 //The initial sparse matrix dimension and sparsity
-#define MATRIX_DIM 10000
-#define SPARSITY 0.80
+#define MATRIX_DIM 20
+#define SPARSITY 0.85
 
-struct timespec start, finish;
+struct timeval start, finish;
 double elapsed;
+
+////Function for rows and columns permutations of arr martrix given a permutation order array R.
+void permute(int * arr,int * R ,int n);
 
 //Function for initializing a sparse symmetric matrix with given sparsity
 void initSparseMatrix(int * arr, double sparsity , int n);
@@ -32,35 +35,28 @@ int main(int argc, char const *argv[]) {
 
   //Allocating memory in the heap for the sparse Matrix.
   int * mat = (int *)malloc(sizeof(int )*n * n ) ;
-  // for (int i=0; i<n ; i++){
-  //   mat[i] = (int *)malloc(sizeof(int) * n ) ;
-  // }
 
 
 
-  //Initialize
+  //Initialize the symmetric sparse matrix
   initSparseMatrix(mat,(double)SPARSITY ,n);
 
-  // //Print the initial symmetric sparse array.
-  // printf("\n [");
-  // for (int i=0; i<n ; i++){
-  //   for (int j = 0; j < n; j++) {
-  //     printf(" %d ", mat[i*n+j]);
-  //   }
-  //   printf("\n  ");
-  // }
-  // printf("]");
 
 
 
-  // int mat[5][5]=
-  // {{ 0  ,1  ,0 ,1  ,0 },
-  //  { 1  ,0  ,0 ,0  ,0 },
-  //  { 0  ,0  ,0 ,0  ,0 },
-  //  { 1  ,0  ,0 ,0  ,0 },
-  //  { 0  ,0  ,0 ,0  ,1 }};
+/*
+  // int mat[MATRIX_DIM*MATRIX_DIM]=
+  // { 0  ,1  ,0 ,1  ,0 , 0 , 0 ,0,
+  //   1  ,0  ,0 ,0  ,0 , 1 , 0 ,0,
+  //   0  ,0  ,0 ,0  ,0 , 0 , 1 ,0,
+  //   1  ,0  ,0 ,0  ,0 , 0 , 0 ,1,
+  //   0  ,0  ,0 ,0  ,1 , 1 , 0 ,0,
+  //   0  ,1  ,0 ,0  ,1 , 0 , 1 ,0,
+  //   0  ,0  ,1 ,0  ,0 , 1 , 0 ,0,
+  //   0  ,0  ,0 ,1  ,0 , 0 , 0 ,1
+  // };
 
-   // //INITIALIZE TEST array
+   // // //INITIALIZE TEST array
    // mat[0*n+0] = 0;
    // mat[0*n+1] = 1;
    // mat[0*n+2] = 0;
@@ -86,24 +82,56 @@ int main(int argc, char const *argv[]) {
    // mat[4*n+2] = 0;
    // mat[4*n+3] = 0;
    // mat[4*n+4] = 1;
+*/
+
+   //Print the initial symmetric sparse matrix pattern.
+   for (int i=0; i<n ; i++){
+     printf("\n|");
+     for (int j = 0; j < n; j++) {
+       if(mat[i*n+j])
+         printf(" # ", mat[i*n+j]);
+       else
+         printf("   ");
+     }
+     printf("|");
+   }
+   printf("\n \n");
 
 
+    //GET the running time of the treebuild
+      // gettimeofday(&start,NULL);
+     int * R= rcm(mat, n);
+     // gettimeofday(&finish,NULL);
+     // elapsed = (finish.tv_sec - start.tv_sec);
+     // elapsed += (finish.tv_usec - start.tv_usec) / 1000000.0;
 
-  //GET the running time of the treebuild
-  clock_gettime(CLOCK_MONOTONIC, &start);
-   int * R= rcm(mat, n);
-  clock_gettime(CLOCK_MONOTONIC, &finish);
-  elapsed = (finish.tv_sec - start.tv_sec);
-  elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+     
+    printf("\n!!!!!!!!!!!!!!THE R MATRIX: !!!!!!\n [ ");
+    for (size_t i = 0; i < n; i++) {
+      printf("%d ",R[i]);
+    }
+    printf("]");
+
+  //Permute the initial matrix with the order of R.
+  permute(mat,R ,n);
 
 
-  printf("\n!!!!!!!!!!!!!!THE R MATRIX: !!!!!!\n [ ");
-  for (size_t i = 0; i < n; i++) {
-    printf("%d ",R[i] +1 );
+  printf("\nThe matrix we get after RCM permutations:\n");
+  //Print the permuted matrix pattern.
+  for (int i=0; i<n ; i++){
+    printf("\n|");
+    for (int j = 0; j < n; j++) {
+      if(mat[i*n+j])
+        printf(" # ", mat[i*n+j]);
+      else
+        printf("   ");
+    }
+    printf("|");
   }
-  printf("]");
+  printf("\n \n");
 
-  printf("\nThe algorithm took %lf seconds! \n", elapsed );
+
+  // printf("\nThe algorithm took %lf seconds! \n", elapsed );
 
 
   printf("\n!!!!!!!!!!!!!!!!!!!!!!!! \n!Tester Run Succesfully!\n!!!!!!!!!!!!!!!!!!!!!!!! \n \n ");
@@ -115,9 +143,9 @@ int main(int argc, char const *argv[]) {
 //Function for initializing a sparse symmetric matrix with given sparsity
 void initSparseMatrix(int * arr, double sparsity , int n){
 
-  // //initialize srand().
+  //initialize srand().
   // srand(time(0));
-
+  //comment this out to have the same matrix in both sequential and openmp executions.
 
   for (int i=0; i<n ; i++){
     for (int j = 0; j < n; j++) {
@@ -146,4 +174,29 @@ int randOneOrZero(double zeroProbability) {
       return 0;
     else
       return 1;
+}
+
+
+//Function for initializing a sparse symmetric matrix with given sparsity
+void permute(int * arr,int * R ,int n){
+
+  int * arr2 =  (int *)malloc(sizeof(int )*n * n ) ;
+
+
+  //permute rows
+  for (int i=0; i<n ; i++){
+    for(int j=0; j<n ; j++){
+      arr2[i*n+j]=arr[R[i]*n+j];
+    }
+  }
+
+  //permute columns
+  for (int i=0; i<n ; i++){
+    for(int j=0; j<n ; j++){
+      arr[i*n+j]=arr2[i*n+R[j]];
+    }
+  }
+
+
+
 }

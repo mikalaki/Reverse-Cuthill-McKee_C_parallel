@@ -1,0 +1,4 @@
+%%Graphs for exercise 4 Parallels and Distributed Systems
+%-Reverse Cuthill Mckee executions time sequential C and OpenMP.
+dataSequential = importdata('sequential.csv');
+dataOpenMP = importdata('openmp.csv');
