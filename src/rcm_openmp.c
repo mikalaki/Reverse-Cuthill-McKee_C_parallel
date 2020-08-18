@@ -159,10 +159,8 @@ int * rcm(int * matrix, int n ){
               queueAdd(Q,nodeNeighbours->data[k]);
               nOfUnvisitedNodes--;
             }
-
-
-
           }
+
         }
         //Adding the current front element of Q queue in R array
         R[Rcounter]= queuePoP(Q);
