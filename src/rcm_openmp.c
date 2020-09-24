@@ -26,7 +26,7 @@ int * rcm(int * matrix, int n ){
   //Number of unvisited nodes, initialize it to n.
   int nOfUnvisitedNodes=n;
 
-  //Array for indication of not visited nodes, if notVisitedNodes[i]= -1 , node is visited, else notVisitedNodes[i]= i;
+  //Array for indication of not visited nodes, if notVisitedNodes[i]==-1 , node is visited, else notVisitedNodes[i]= i;
   //initialization happens later.
   int * notVisitedNodes= (int *) malloc(sizeof(int) * n);
   if( !notVisitedNodes ){
@@ -107,7 +107,7 @@ int * rcm(int * matrix, int n ){
 
         /*Finding the neighbours of the node that is going to be add next in the R array.
         By parallelize the for loop, we get significant improve in time.
-        By using the ordered property race condition is avoided and correctness is quaranted.
+        By using the ordered property, race condition is avoided and correctness is quaranted.
         Furthermore ordered property, ensures that the nodeNeighbours queue will be filled with the same order as
         in sequential version of the code, so the R array is going to be exactly the same.*/
         #pragma omp parallel for ordered  shared(Q,matrix) private(j)
@@ -220,7 +220,7 @@ void merge(int * arr,int * idx, int l, int m, int r)
     int L[n1], R[n2];
     int Lidx[n1], Ridx[n2];
 
-    /* Copy data to temp arrays L[] and R[], in parallel, with sections
+    /* Copy data to temp arrays L[] and R[], in parallel, with sections,
     one thread copies data to L[] array and the other copies to R[] */
     #pragma omp parallel sections  shared(arr,idx)
     {

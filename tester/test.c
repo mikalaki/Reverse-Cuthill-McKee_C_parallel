@@ -18,15 +18,17 @@
 struct timeval start, finish;
 double elapsed;
 
-////Function for rows and columns permutations of arr martrix given a permutation order array R.
+//Function for rows and columns permutations of arr martrix given a permutation order array R.
 void permute(int * arr,int * R ,int n);
 
 //Function for initializing a sparse symmetric matrix with given sparsity
 void initSparseMatrix(int * arr, double sparsity , int n);
 
-//Function for initializing a sparse symmetric matrix with given sparsity
+//Function for generation of 0 and 1 , with given probability for zeros.
 int randOneOrZero(double zeroProbability);
 
+
+//main function of tester programm
 int main(int argc, char const *argv[]) {
   int n = MATRIX_DIM;
   clock_t t;
@@ -99,13 +101,13 @@ int main(int argc, char const *argv[]) {
 
 
     //GET the running time of the treebuild
-      // gettimeofday(&start,NULL);
+      gettimeofday(&start,NULL);
      int * R= rcm(mat, n);
-     // gettimeofday(&finish,NULL);
-     // elapsed = (finish.tv_sec - start.tv_sec);
-     // elapsed += (finish.tv_usec - start.tv_usec) / 1000000.0;
+     gettimeofday(&finish,NULL);
+     elapsed = (finish.tv_sec - start.tv_sec);
+     elapsed += (finish.tv_usec - start.tv_usec) / 1000000.0;
 
-     
+
     printf("\n!!!!!!!!!!!!!!THE R MATRIX: !!!!!!\n [ ");
     for (size_t i = 0; i < n; i++) {
       printf("%d ",R[i]);
@@ -117,6 +119,7 @@ int main(int argc, char const *argv[]) {
 
 
   printf("\nThe matrix we get after RCM permutations:\n");
+
   //Print the permuted matrix pattern.
   for (int i=0; i<n ; i++){
     printf("\n|");
@@ -130,8 +133,8 @@ int main(int argc, char const *argv[]) {
   }
   printf("\n \n");
 
-
-  // printf("\nThe algorithm took %lf seconds! \n", elapsed );
+  //Print the algorithm's execution time.
+  printf("\nThe algorithm took %lf seconds! \n", elapsed );
 
 
   printf("\n!!!!!!!!!!!!!!!!!!!!!!!! \n!Tester Run Succesfully!\n!!!!!!!!!!!!!!!!!!!!!!!! \n \n ");
@@ -152,7 +155,7 @@ void initSparseMatrix(int * arr, double sparsity , int n){
       //Main diagonal Matrix elements.
       if (i == j)//
          //arr[i][j] = 0; //from a node I cannot access the same node.
-         arr[i*n+j] =randOneOrZero((double)sparsity);
+         arr[i*n+j] =randOneOrZero((double)sparsity); // a node can access itself.
       //Other elements of the matrix. (symmetric elements)
       else if (i>j){
         arr[i*n+j]=randOneOrZero((double)sparsity);
@@ -177,7 +180,7 @@ int randOneOrZero(double zeroProbability) {
 }
 
 
-//Function for initializing a sparse symmetric matrix with given sparsity
+//Function for rows and columns permutations of arr martrix given a permutation order array R. (definition)
 void permute(int * arr,int * R ,int n){
 
   int * arr2 =  (int *)malloc(sizeof(int )*n * n ) ;

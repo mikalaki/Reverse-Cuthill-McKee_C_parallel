@@ -1,6 +1,6 @@
 /*
 *       Parallels and Distributed Systems Exercise 4
-*       (Sequential) implementation of Reverse Cuthill Mckee algorithm for sparse matriices in C.
+*       (Sequential) implementation of Reverse Cuthill Mckee algorithm for sparse matrices in C.
 *       Author:Michael Karatzas
 *       AEM:9137
 *       September 2020
@@ -24,7 +24,7 @@ int * rcm(int * matrix, int n ){
   //Number of unvisited nodes, initialize it to n.
   int nOfUnvisitedNodes=n;
 
-  //Array for indication of not visited nodes, if notVisitedNodes[i]= -1 , node is visited, else notVisitedNodes[i]= i;
+  //Array for indication of not visited nodes, if notVisitedNodes[i]==-1 , node is visited, else notVisitedNodes[i]= i;
   int * notVisitedNodes= (int *) malloc(sizeof(int) * n);
   if( !notVisitedNodes ){
     printf("Problem Allocating Memory!\n" );
@@ -37,7 +37,7 @@ int * rcm(int * matrix, int n ){
   //Initializing queue that stores a node's neighbours,with capacity equals to n.
   queue * nodeNeighbours = queueInit(n);
 
-  //Array to store the degrees of the node's neighbours ,for each node,passed to empty Q , it is reallocated.
+  //Array to store the degrees of the next in R node's neighbours ,for each node,passed to empty Q , it is reallocated.
   int * degreesToShort=(int *)malloc(sizeof(int));
   if( !degreesToShort ){
     printf("Problem Allocating Memory!\n" );
@@ -148,7 +148,7 @@ int * rcm(int * matrix, int n ){
 }
 
 //Definition of method for calculating degrees of nodes
-void calculateDegrees(int * degrees,int * arr, int n ){ // problhma eiani oti den pernaei o 2d pinakas
+void calculateDegrees(int * degrees,int * arr, int n ){ 
 
   for (int i = 0; i < n; i++) {
     int count = 0;

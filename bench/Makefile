@@ -1,5 +1,5 @@
 #      Parallels and Distributed Systems Exercise 4
-#			 Makefile for bencher
+#			 Makefile for bench programm
 #      Author:Michael Karatzas
 #      AEM:9137
 #			 September 2020

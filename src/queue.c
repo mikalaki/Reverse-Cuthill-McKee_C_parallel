@@ -1,6 +1,6 @@
 /*
 *       Parallels and Distributed Systems Exercise 4
-*       Queue's Methods definition.
+*       Queue's Methods' definition.
 *       Author:Michael Karatzas
 *       AEM:9137
 *       September 2020
