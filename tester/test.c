@@ -37,6 +37,10 @@ int main(int argc, char const *argv[]) {
 
   //Allocating memory in the heap for the sparse Matrix.
   int * mat = (int *)malloc(sizeof(int )*n * n ) ;
+  if( !mat ){
+    printf("Problem Allocating Memory!\n" );
+    exit(1);
+  }
 
 
 
@@ -136,7 +140,7 @@ int main(int argc, char const *argv[]) {
   //Print the algorithm's execution time.
   printf("\nThe algorithm took %lf seconds! \n", elapsed );
 
-
+  free(mat);
   printf("\n!!!!!!!!!!!!!!!!!!!!!!!! \n!Tester Run Succesfully!\n!!!!!!!!!!!!!!!!!!!!!!!! \n \n ");
 }
 
@@ -184,7 +188,10 @@ int randOneOrZero(double zeroProbability) {
 void permute(int * arr,int * R ,int n){
 
   int * arr2 =  (int *)malloc(sizeof(int )*n * n ) ;
-
+  if( !arr2  ){
+    printf("Problem Allocating Memory!\n" );
+    exit(1);
+  }
 
   //permute rows
   for (int i=0; i<n ; i++){
@@ -200,6 +207,7 @@ void permute(int * arr,int * R ,int n){
     }
   }
 
+  free(arr2);
 
 
 }

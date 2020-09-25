@@ -34,6 +34,10 @@ int main(int argc, char const *argv[]) {
   clock_t t;
   double time_taken;
   int * mat = (int *)malloc(sizeof(int )*2) ;
+  if( !mat  ){
+    printf("Problem Allocating Memory!\n" );
+    exit(1);
+  }
 
   for(int ii=0;ii<10;ii++){ // this loop is for scanning the simensions array in ln 20
     //Allocating and reallocationg memory in the heap for the sparse Matrix.
@@ -41,6 +45,11 @@ int main(int argc, char const *argv[]) {
       mat = (int *)malloc(sizeof(int )*dimensions[ii]* dimensions[ii] ) ;
     else
       mat=(int *) realloc(mat, (size_t)dimensions[ii]* dimensions[ii]*sizeof(int));
+
+    if( !mat  ){
+      printf("Problem Allocating Memory!\n" );
+      exit(1);
+    }
 
     //pointer for the csv file.
     FILE *pointerToFile;
