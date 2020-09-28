@@ -5,7 +5,7 @@ There are two methods of executing the algorithm.
 ### Execution Method 1 - via tester program
 In order to execute the program via tester program,which is the program in `/tester/test.c`, you have to visit the `/tester` directory and then execute: <br>
 `make test_sequential` command in order to test -execute the sequential version of the algorithm or <br>
-`make test_openmp` in order to test - execute the parallel (openmp) version of the algorithm. <br>
+`make test_openmp` in order to test - execute the parallel (openmp) version of the algorithm. <br> <br>
 By executing the tester program , you get 1)the initial matrix pattern , 2)the pattern of the matrix after the permutations and 3)the algorithm execution time, all printed on console.<br>
 By default , the one matrix dimension n is set to 20 and the sparsity to 85%.
 You can change those parameters in `test.c` file in line 15 and 16 from `MATRIX_DIM` and `SPARSITY` values .<br>
