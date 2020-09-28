@@ -13,5 +13,5 @@ You can change those parameters in `test.c` file in line 15 and 16 from `MATRIX_
 ### Execution Method 2- via Benchmarking Program
 In order to execute the program via Benchmarking program,which is the program in `/bench/bench.c`, you have to visit the `/bench` directory and then execute: <br>
 `make bench_sequential` command in order to test -execute the sequential benchmark of the algorithm or <br>
-`make bench_openmp` in order to test - execute the parallel (openmp) benchmark of the algorithm. <br>
+`make bench_openmp` in order to test - execute the parallel (openmp) benchmark of the algorithm. <br> <br>
 By executing the benchmark program , you get the average execution time, of executions, of the algorithm ,for a set of matrix dimensions for agiven sparsity. You can modify those parameters inside the bench.c file.
